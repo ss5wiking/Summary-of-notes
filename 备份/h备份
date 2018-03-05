@@ -1,0 +1,93 @@
+<%= form_for(inquiry,:html => {class:'zm_fillReferralbg  medical_record_sheets'}) do |f| %>
+<% if inquiry.errors.any? %>
+<div id="error_explanation">
+  <h2><%= pluralize(inquiry.errors.count, "error") %>
+    prohibited this inquiry from being saved:</h2>
+
+  <ul>
+    <% inquiry.errors.full_messages.each do |message| %>
+    <li><%= message %></li>
+    <% end %>
+  </ul>
+</div>
+<% end %>
+<%#= f.hidden_field :doctor_id %>
+<%#= f.hidden_field :patient_id %>
+<%= hidden_field_tag :doctor_id, params[:doctor_id] %>
+<%= hidden_field_tag :source_id, params[:source_id] %>
+<%= hidden_field_tag :source_type, params[:source_type] %>
+<%= hidden_field_tag :patient_id, current_user.id %>
+<%= f.hidden_field :disease_id, value:params[:disease_id] %>
+<div class="common_list_item clearfix zm_person">
+  <div class="common_font_title1">问诊人</div>
+  <div class="common_font_title2 personText"><% if session[:family_id].present? %><%= Family.find(session[:family_id]).name %><% else %>选择问诊人<% end %></div>
+  <%= image_tag "healthAdvisory/arrow.svg", class: "common_arrow" %>
+  <input type="text" hidden="hidden" class="personText2"/>
+</div>
+<a href="<%= archives_path %>" class="common_list_item clearfix">
+  <div class="common_font_title1">健康档案</div>
+  <div class="common_font_title2">家族史、过敏史等</div>
+  <%= image_tag "healthAdvisory/arrow.svg", class: "common_arrow" %>
+  <input type="text" hidden="hidden"/>
+</a>
+<a href="<%= disease_medical_record_sheets_path %>" class="common_list_item clearfix">
+  <div class="common_font_title1">疾病</div>
+  <div class="common_font_title2"><% if params[:disease_id].present? %><%= NcdDisease.find(params[:disease_id]).name %><% else %>未确诊可不填<% end %></div>
+  <%= image_tag "healthAdvisory/arrow.svg", class: "common_arrow" %>
+  <input type="text" hidden="hidden"/>
+</a>
+<div class="common_section_margin common_list_item_area">
+  <div class="common_font_title1">症状说明</div>
+  <%= f.text_area :symptom, class: 'common_textArea', placeholder: '说说您哪里不舒服（包括部位、症状），需要什么样的帮助，描述越详细，匹配医生更准确哦，埃迪森将确保您的隐私安全。（10-500字）', rows: 5 %>
+</div>
+
+<!-- <div class="zm_fillReferralBody">
+      <span>症状说明</span>
+      <%#= f.text_area :content, class: 'common_textArea', placeholder: '说说您哪里不舒服（包括部位、症状），需要什么样的帮助，描述越详细，匹配医生更准确哦，埃迪森将确保您的隐私安全。（10-500字）', rows: 5 %>
+    </div> -->
+
+<div class="common-image-upload clearfix">
+  <p class="common_font_title1">上传图片<span class="common_font_title2 default_text_color">（检查报告、处方和其他病情资料）</span>
+  </p>
+  <div class="zm_list_item">
+    <%= f.nested_fields_for :inquiry_files do |ff| %>
+    <%= ff.file_field :file, class: 'zm_file', hidden: true %>
+    <div class="zm_cover"><img/></div>
+    <% end %>
+
+    <div class="zm_fillReferralUpload ">
+      <%= image_tag "healthAdvisory/addIcon.svg", class: "zm_fillReferraladd" %>
+    </div>
+
+    <%= f.add_nested_fields_link :inquiry_files, '', id: 'add_inquiry_file_link' %>
+
+  </div>
+</div>
+
+<div class="modal fade" id="zm_coverdadd_modal" tabindex="-1">
+  <div class="common_bottom">
+    <div class="list-group-item zm_album">
+      <span class="common_fontblue">相册</span>
+    </div>
+    <div class="list-group-item common_marginTop" data-dismiss="modal">
+      <span>取消</span>
+    </div>
+  </div>
+</div>
+
+<!-- 问诊人 modal -->
+<div class="modal fade common_modalDiv" id="exampleModal1" tabindex="1">
+  <div class="common_model_bottom common_model_white_bg_auto">
+    <div class="zm_modalHeader">
+
+    </div>
+  </div>
+</div>
+<!-- 问诊人 modal -->
+
+
+<div class=" common_btnCenter text-center">
+  <%= f.submit '去支付', class: ' btn go_pay btn-success common_grayBtn' %>
+  <%= link_to '返回', inquiries_path, class: ' btn btn-secondary common_grayBtn' %>
+</div>
+<% end %>

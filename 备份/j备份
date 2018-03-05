@@ -1,0 +1,107 @@
+
+if $('.medical_record_sheets').length>0
+  #Start 上传图片
+  $('#zm_coverdadd_modal .zm_album').on 'click',->
+      $('#add_inquiry_file_link').click()
+      $zm_file = $(".zm_file").last()
+      $zm_file.click()
+      $zm_file.on "change" ,(event) ->
+        files=event.target.files
+        name=event.target.value
+        image=files[0]
+        reader=new FileReader()
+        reader.readAsDataURL(image)
+        $this=$(this)
+        reader.onload =(file) ->
+          fileName = name.substring(name.lastIndexOf(".")+1).toLowerCase()
+          if fileName !="jpg" && fileName !="jpeg" && fileName !="pdf" && fileName !="png" && fileName !="dwg" && fileName !="gif"
+            $('#img_type_error').modal('show')
+            $('#img_type_error .zm_determine').click ->
+              $('#img_type_error').modal('hide')
+          else
+            $(".zm_cover").last().find('img').last().removeClass('zm_coverdadd').addClass('zm_imgshow').attr("src",file.target.result)
+            $('#zm_coverdadd_modal').modal('hide')
+
+
+          $(".zm_list_item .zm_cover img").each (index,item) ->
+            if !$(item).attr('src')
+              $(".zm_list_item  fieldset").eq(index).remove()
+
+          if $(".zm_list_item fieldset").length >= 8
+            $('.zm_fillReferralUpload').hide();
+
+  $(".zm_fillReferraladd").click ->
+    $('#zm_coverdadd_modal').modal('show')
+
+  $(".zm_person").click ->
+    $.ajax({
+      type: "get",
+      url: "/medical_record_sheets/get_family",
+      dataType: "json",
+      success: (data)->
+
+        person=[]    #["的",'ss','da']
+        idea=[]       #['25','23','32']
+
+        fn = (item)->
+          person.push(item.name)
+          idea.push(item.id)
+
+        fn item for item in data.families;
+
+        personwheels=[
+          [
+            {values:person,label:"问诊人",}
+          ]
+        ]
+        # console.log(idea)
+        initMobi('问诊人',personwheels,(array) ->
+          chosePerson=array[0]
+          choseID="";
+          $(person).each (index,item )->
+            if item == chosePerson
+              choseID=idea[index];
+
+          #找到person 的index
+
+          #知道 idea[index] 就是你要的id
+
+          $('.personText2').val(array[0].slice(0,-2))
+          sessionStorage.setItem("session[:family_id]",choseID)
+
+          $(".okDate").click ->
+            #chosePerson=sessionStorage.getItem("session[:family_id]");
+            str="";
+            fn = (item) ->
+              if item.name = chosePerson
+                str= item.name + " " +item.sex + " " +item.age + " 岁 "
+
+            fn item for item in data.families
+
+
+            $(".personText").html(str)
+            $('#exampleModal1').modal('hide')
+        );
+
+
+    });
+
+
+  initMobi =(title,data,fn)->
+      str='<a class="common_font_title2 pull-left" data-dismiss="modal">取消</a>'+
+      '<span class="madalText">'+title+'</span>'+
+      '<a class="common_font_title2 pull-right okDate">确定</a>'+
+      '<input type="text" class="orderDate" style="display: none"/>';
+      $('.zm_modalHeader').html(str);
+      $('.orderDate').mobiscroll().scroller({
+          theme:'mobiscroll'
+          display:'inline'
+          lang:'zh'
+          showLabel:false
+          rows:5
+          wheels:data
+          formatResult: fn
+      })
+      $('#exampleModal1').modal('show')
+
+  #End 上传图片
